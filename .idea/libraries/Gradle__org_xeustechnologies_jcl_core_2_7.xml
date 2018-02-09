@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.xeustechnologies:jcl-core:2.7">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.xeustechnologies/jcl-core/2.7/dbfecf1501eb5a90aa393c3883a45c8a949a742e/jcl-core-2.7.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.xeustechnologies/jcl-core/2.7/97d3ad62685060cc3020d8294de0b6f514ca7f0e/jcl-core-2.7-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
