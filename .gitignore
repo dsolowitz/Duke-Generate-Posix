@@ -1,0 +1,14 @@
+#IntelliJ stuff to ignore
+.idea
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/vcs.xml
+.idea/jsLibraryMappings.xml
+
+#Gradle stuff to ignore
+.idea/gradle.xml
+.idea/libraries
+.gradle
+.gradle/2.13
+
