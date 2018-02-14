@@ -9,9 +9,6 @@ import java.sql.SQLException;
 
 public class MockDBConnection {
 
-    public  Connection getMockDBConnection(){
-        return Mockito.mock(Connection.class);
-    }
 
     public  Connection getMockDBConnection(String query, long result) throws SQLException{
 
@@ -19,8 +16,9 @@ public class MockDBConnection {
         PreparedStatement ps = Mockito.mock(PreparedStatement.class);
         ResultSet rs =  Mockito.mock(ResultSet.class);;
 
-        Mockito.when(dbConn.prepareStatement(query)).thenReturn(ps);
         Mockito.when(ps.executeQuery()).thenReturn(rs);
+        Mockito.when(dbConn.prepareStatement(query)).thenReturn(ps);
+
 
         if(result > -1 ) {
             Mockito.when(rs.next()).thenReturn(true);

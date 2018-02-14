@@ -24,6 +24,7 @@ public class PosixGroupSyncTest {
     private MockDBConnection mockDBConnection = new MockDBConnection();
 
 
+
     ///////////////////////////////////////////////////////////////////////////////////////////
     // GidNumber tests
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -39,7 +40,7 @@ public class PosixGroupSyncTest {
 
         //Making the result to the getGidNumber method as PosixGroupSync class would do:
         //  handing it a database connection and a query
-        String gidNumberReturned = PosixGroupSync.getGidNumber(mockedDBConn, mySQLQuery);
+        String gidNumberReturned = PosixGroupSync.getGidNumber(mySQLQuery, mockedDBConn);
 
         //Checking to see if the result was
         assertEquals(Long.toString(gidNumberExpected),gidNumberReturned);
@@ -61,7 +62,7 @@ public class PosixGroupSyncTest {
         //  handing it a database connection and a query.
         //This should cause a RunTimeException, so looking for that in the catch block
         try {
-            String gidNumberReturned = PosixGroupSync.getGidNumber(mockedDBConn, mySQLQuery);
+            String gidNumberReturned = PosixGroupSync.getGidNumber(mySQLQuery, mockedDBConn);
 
             //If we get here, then the Exception was not throw
             Assert.fail("Should not get here, RuntimeException was not thrown");
@@ -73,7 +74,7 @@ public class PosixGroupSyncTest {
         assertTrue(expectedException instanceof RuntimeException);
 
         //Todo:  Since right now this will ALWAYS be a RTE, we should probably check something else
-        //assertEquals(expectedException.getMessage(), "Message that you set when to throw the exception");
+        assertEquals(expectedException.getMessage(), "No rows returned when asked for the next gidNumber.");
 
     }
 
@@ -100,11 +101,13 @@ public class PosixGroupSyncTest {
 
         LdapContext mockedConn = mockLdapContext.getMockedLdapContext(baseDN, filter, searchResults);
 
-        List<SearchResult> testResults = PosixGroupSync.getLDAPGroupsToSync(mockedConn, baseDN);
+        List<SearchResult> testResults = PosixGroupSync.SearchLDAP(baseDN, mockedConn);
 
         assertEquals("Names should match", expectedResult.getNameInNamespace(), testResults.get(0).getNameInNamespace());
 
     }
+
+
 
 }
 
