@@ -33,7 +33,7 @@ public class PosixGroupSync extends AbstractScheduledTask {
         }
 
         PosixGroupSyncConfig config = PosixGroupSyncConfig.getInstance();
-        String[] baseDns = config.getProperty("baseDns", true).split("|");
+        String[] baseDns = config.getProperty("baseDns", true).split("\\|");
 
         String sqlQuery = config.getProperty("sqlQuery", true);
         LdapContext context = PosixGroupSync.getContext();
@@ -58,6 +58,7 @@ public class PosixGroupSync extends AbstractScheduledTask {
             //store each dn from config file by looping through attributesfromid array
             for (int i = 0; i < baseDns.length; i++) {
                 String dn = baseDns[i];
+                LOG.info(LOG_HEADER + "Checking baseDn for eligable groups baseDn="+dn );
                 //pass string dn as parameter to each iteration of ldapconnection
                 List<SearchResult> results = SearchLDAP(dn, context);
 
@@ -65,6 +66,14 @@ public class PosixGroupSync extends AbstractScheduledTask {
 
                     PosixGroupSync.setGidSetPosix(results, sqlQuery, context);
                 }
+            }
+        }
+
+        if (context != null) {
+            try {
+                context.close();
+            } catch (Exception e) {
+                LOG.warn(LOG_HEADER + "WHY ARE YOU HERE IN THE CATCH BLOCK OF SETGIDSETPOSIX", e);
             }
         }
 
@@ -76,7 +85,7 @@ public class PosixGroupSync extends AbstractScheduledTask {
         try {
             context = LDAPConnectionFactory.getAuthdirAdminConnection();
         } catch (Exception e) {
-            LOG.warn("Could not connect to LDAP.", e);
+            LOG.warn(LOG_HEADER + "Could not connect to LDAP.", e);
         }
 
         return context;
@@ -86,7 +95,7 @@ public class PosixGroupSync extends AbstractScheduledTask {
     static List<SearchResult> SearchLDAP(String dn, LdapContext context){
         List<SearchResult> results = null;
         try {
-            results = LDAPUtils.findEntriesByFilter(context, dn, "(&(objectClass=groupOfNames)(!(objectClass=posixGroup)))", -1, new String[]{"cn", "objectClass"}, true);
+            results = LDAPUtils.findEntriesByFilter(context, dn, "(&(objectClass=groupOfNames)(!(objectClass=posixGroup)))", -1, new String[]{"cn", "objectClass"}, false);
         } catch (Exception e) {
             LOG.warn(LOG_HEADER + "Could not search LDAP baseDn="+dn, e);
         }
@@ -100,7 +109,7 @@ public class PosixGroupSync extends AbstractScheduledTask {
 
             try {
                 String gid = PosixGroupSync.getGidNumber(sqlQuery, conn);
-                LOG.info(LOG_HEADER + "gidNumber returned, gidNumber="+gid);
+                LOG.info(LOG_HEADER + "message=\"gidNumber returned\", gidNumber="+gid);
 
                 //Building the Attributes for objectClass and gidNumber
                 Attribute objectClass = result.getAttributes().get("objectClass");
@@ -111,21 +120,12 @@ public class PosixGroupSync extends AbstractScheduledTask {
                 gidAtts.add(gid);
                 posixAtts.put(gidAtts);
 
-                LDAPUtils.addAttributes(context, result.getNameInNamespace(), posixAtts);
+                LDAPUtils.replaceAttributes(context, result.getNameInNamespace(), posixAtts);
                 LOG.info(LOG_HEADER + "result=success group="+result.getName());
             } catch (NamingException e) {
                 LOG.warn(LOG_HEADER + "result=fail group="+result.getName() + "message=\"Could not set gidNumber in LDAP\"", e);
             } catch (RuntimeException rte){
                 LOG.warn(LOG_HEADER + "result=fail group="+result.getName(), rte);
-            } finally{
-
-                if (context != null) {
-                    try {
-                        context.close();
-                    } catch (Exception e) {
-                        LOG.warn(LOG_HEADER + "WHY ARE YOU HERE IN THE CATCH BLOCK OF SETGIDSETPOSIX", e);
-                    }
-                }
             }
         }
     }
